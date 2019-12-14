@@ -1,6 +1,6 @@
-# Redis-S3
+# S3-Sync
 
-A simple Redis image backed by S3 storage.
+A simple helper container for syncing volumes with S3 for quasi-reliable storage. 
 
 ## Background
 Sometimes you'd like to use a Redis store and you'd like to save it's data, but you don't want to
@@ -17,8 +17,8 @@ map the resulting `.s3cfg` file into your container at `/root/.s3cfg`.
 
 You must supply an environment variable S3_URL with the bucket/prefix where you want your data
 stored, e.g., `s3://foo-redis/`. The bucket must exist already. You must supply a `S3_DIRECTORY`
-environment varible containing a path to the directory to sync. /Both the `S3_URL` and the
-`S3_DIRECTORY` variables **must** end in a slash (`/`). 
+environment varible containing a path to the directory to sync. *Both the `S3_URL` and the
+`S3_DIRECTORY` variables **must** end in a slash (`/`).*
 
 You may also configure a GPG key to use (and configure s3cmd to use it) and your data will be
 encypted/decrypted to/from S3. 
