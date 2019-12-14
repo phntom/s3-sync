@@ -17,4 +17,4 @@ RUN apk add --update \
 
 COPY startup watch push /usr/local/bin/
 
-CMD startup
+CMD watch

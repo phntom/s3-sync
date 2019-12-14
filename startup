@@ -2,6 +2,3 @@
 
 s3cmd sync $S3_URL "$S3_DIRECTORY"
 
-/usr/local/bin/watch &
-
-redis-server
