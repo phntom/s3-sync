@@ -1,0 +1,3 @@
+#!/bin/sh
+
+s3cmd sync "$S3_DIRECTORY" $S3_URL

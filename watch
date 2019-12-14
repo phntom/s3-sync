@@ -1,0 +1,6 @@
+#!/bin/sh
+
+inotifywait -m "$S3_DIRECTORY" -e close_write |
+    while read path action file; do
+      push
+    done
