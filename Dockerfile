@@ -1,6 +1,6 @@
-ARG S3CMD_VERSION=2.0.2
-
 FROM alpine:3.10
+
+ARG S3CMD_VERSION=2.0.2
 
 RUN apk add --update \
         ca-certificates \
