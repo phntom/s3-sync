@@ -80,13 +80,6 @@ spec:
           preStop:
             exec:
               command: ["sh", "-c", "echo 'SHUTDOWN SAVE' | redis-cli"]
-        resources:
-          requests:
-            memory: 32Mi
-            cpu: 10m
-          limits:
-            memory: 64Mi
-            cpu: 50m
         volumeMounts:
         - mountPath: /data
           name: redis
