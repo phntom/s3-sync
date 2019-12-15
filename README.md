@@ -3,13 +3,9 @@
 A simple helper container for syncing volumes with S3 for quasi-reliable storage. 
 
 ## Background
-Sometimes you'd like to use a Redis store and you'd like to save it's data, but you don't want to
-waste an entire Kubernetes PersistentVolume on it, because that might waste most of a gigabyte or ten
-for a few kilobytes of storage. Enter koehn/redis-s3. 
+Sometimes you'd like to use a Redis store and you'd like to save it's data, but you don't want to waste an entire Kubernetes PersistentVolume on it, because that might waste most of a gigabyte or ten for a few kilobytes of storage. Enter koehn/s3-sync.
 
-This image will take the files Redis outputs to the (default) `/data` directory and sync them to 
-S3 using the Redis and s3cmd configuration you supply. The next time the container is started, the contents
-will sync back to the `/data` directory prior to Redis starting up. 
+This image can watch a directory on a volume you specify and sync it to a bucket on an S3-compatible server. It’s not perfect backups, but it’s good enough for cached data that you’d rather not build every time your container launches. 
 
 ## Configuration
 You must run `s3cmd --configure` to set up how s3cmd will talk to your S3 bucket. You should then
