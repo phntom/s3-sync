@@ -1,0 +1,4 @@
+#!/bin/sh
+
+addgroup -g $GROUPID group
+adduser -DH -u $USERID -G group user

@@ -5,16 +5,17 @@ RUN apk add --update \
         curl \
         gnupg \
         inotify-tools \
-        python \
         py-dateutil \
+        py-magic \
         py-setuptools \
-        py-magic && \
+        python \
+        sudo && \
     rm -rf /var/cache/apk/* && \
     curl -L https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz | tar xzf - -C /tmp && \
     cd /tmp/s3cmd-2.0.2 && \
     python setup.py install && \ 
     rm -rf /tmp/s3cmd-2.0.2 
 
-COPY startup watch push /usr/local/bin/
+COPY createuser startup watch push /usr/local/bin/
 
 CMD watch
