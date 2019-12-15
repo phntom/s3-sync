@@ -2,7 +2,7 @@
 
 if [ ! -z "$USERID" -a ! -z "$GROUPID" ] ; then
   createuser
-  sudo -u user -g group -- s3cmd sync $S3_URL "$S3_DIRECTORY"
+  sudo -u user -g group -- s3cmd -c /root/.s3cfg sync $S3_URL "$S3_DIRECTORY"
 else
   echo "Warning: USERID and GROUPID not set. Files synced will be owned as root:root."
   s3cmd sync "$S3_URL" "$S3_DIRECTORY"
