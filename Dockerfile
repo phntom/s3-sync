@@ -1,3 +1,5 @@
+ARG S3CMD_VERSION=2.0.2
+
 FROM alpine:3.10
 
 RUN apk add --update \
@@ -11,10 +13,10 @@ RUN apk add --update \
         python \
         sudo && \
     rm -rf /var/cache/apk/* && \
-    curl -L https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz | tar xzf - -C /tmp && \
-    cd /tmp/s3cmd-2.0.2 && \
+    curl -L https://github.com/s3tools/s3cmd/releases/download/v$S3CMD_VERSION/s3cmd-$S3CMD_VERSION.tar.gz | tar xzf - -C /tmp && \
+    cd /tmp/s3cmd-$S3CMD_VERSION && \
     python setup.py install && \ 
-    rm -rf /tmp/s3cmd-2.0.2 
+    rm -rf /tmp/s3cmd-$S3CMD_VERSION 
 
 COPY createuser startup watch push /usr/local/bin/
 

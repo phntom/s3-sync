@@ -1,0 +1,9 @@
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+  - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination koehn/s3-sync:$CI_COMMIT_TAG --build-arg S3CMD_VERSION=$(echo $CI_COMMIT_TAG | awk -F '-' '{print $1}')
+  only: 
+  - tags
