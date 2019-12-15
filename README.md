@@ -53,8 +53,12 @@ spec:
       initContainers:
       - name: s3sync-startup
         command: ["startup"]
-        image: koehn/s3-sync:2.0.2-3
+        image: koehn/s3-sync:2.0.2-8
         env:
+        - name: USERID
+          value: "999"
+        - name: GROUPID
+          value: "1000"
         - name: S3_URL
           value: s3://foo-redis/
         - name: S3_DIRECTORY
@@ -62,7 +66,7 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: redis
-        - mountPath: /root/.s3cfg
+        - mountPath: /.s3cfg
           name: redis-s3cfg
           subPath: s3cfg
           readOnly: true
@@ -86,9 +90,13 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: redis
-      - image: koehn/s3-sync:2.0.2-3
+      - image: koehn/s3-sync:2.0.2-8
         name: s3-sync
         env:
+        - name: USERID
+          value: "999"
+        - name: GROUPID
+          value: "1000"
         - name: S3_URL
           value: s3://foo-redis/
         - name: S3_DIRECTORY
@@ -96,7 +104,7 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: redis
-        - mountPath: /root/.s3cfg
+        - mountPath: /.s3cfg
           name: redis-s3cfg
           subPath: s3cfg
           readOnly: true
