@@ -13,15 +13,15 @@ will sync back to the `/data` directory prior to Redis starting up.
 
 ## Configuration
 You must run `s3cmd --configure` to set up how s3cmd will talk to your S3 bucket. You should then
-map the resulting `.s3cfg` file into your container at `/root/.s3cfg`. 
+map the resulting `.s3cfg` file into your container at `/.s3cfg`. 
 
 You must supply an environment variable S3_URL with the bucket/prefix where you want your data
 stored, e.g., `s3://foo-redis/`. The bucket must exist already. You must supply a `S3_DIRECTORY`
 environment varible containing a path to the directory to sync. *Both the `S3_URL` and the
 `S3_DIRECTORY` variables **must** end in a slash (`/`).*
 
-You may also configure a GPG key to use (and configure s3cmd to use it) and your data will be
-encypted/decrypted to/from S3. 
+You should configure environment variables USERID and GROUPID, which will be set prior to running
+s3cmd to insure that files have the appropriate user:group metadata set. 
 
 In a Kubernetes environment, you should configure two s3-sync containers: an initContainer with a 
 `command: ["startup"]`, and a regular container, with no command. 

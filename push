@@ -1,8 +1,8 @@
 #!/bin/sh
 
 if [ ! -z "$USERID" -a ! -z "$GROUPID" ] ; then
-  sudo -u user -g group -- s3cmd sync "$S3_DIRECTORY" $S3_URL
+  sudo -u user -g group -- s3cmd -c /.s3cfg sync "$S3_DIRECTORY" $S3_URL
 else
-  s3cmd sync "$S3_DIRECTORY" $S3_URL
+  s3cmd -c /.s3cfg sync "$S3_DIRECTORY" $S3_URL
 fi
 
