@@ -1,9 +1,9 @@
 #!/bin/sh
 
-if [ ! -z "$USERID" -a ! -z "$GROUPID" ] ; then
+trap "exit 0" INT TERM EXIT
+
+if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
   createuser
-else
-  echo "Warning: USERID and GROUPID not set. Files will be pushed with UID/GID metadata and pulled at startup as root:root."
 fi
 
 inotifywait -mr "$S3_DIRECTORY" -e close_write |
