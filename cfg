@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ -n "$S3_ENDPOINT_HOSTNAME" ] ; then
+    echo "S3_ENDPOINT_HOSTNAME specified using $S3_ENDPOINT_HOSTNAME (specify the hostname only)"
+    sed -i"" "s/s3.amazonaws.com/${S3_ENDPOINT_HOSTNAME}/g" /.s3cfg
+fi
+
+s3cmd -c /.s3cfg ls "$S3_URL" > /dev/null
+
+exit_status=$?
+if [ $exit_status -ne 0 ]; then
+    echo "ERROR: failed to list target directory"
+    [ -n "$AWS_ACCESS_KEY_ID" ] || echo "AWS_ACCESS_KEY_ID not specified"
+    [ -n "$AWS_SECRET_ACCESS_KEY" ] || echo "AWS_SECRET_ACCESS_KEY not specified"
+    [ -n "$AWS_ROLE_ARN" ] || echo "AWS_ROLE_ARN not specified"
+    [ -n "$AWS_WEB_IDENTITY_TOKEN_FILE" ] || echo "AWS_WEB_IDENTITY_TOKEN_FILE not specified"
+
+    sleep 10
+    exit $exit_status
+fi

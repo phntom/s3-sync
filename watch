@@ -2,6 +2,8 @@
 
 trap "exit 0" INT TERM EXIT
 
+cfg || exit 4
+
 if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
   createuser
 fi
