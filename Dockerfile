@@ -1,6 +1,7 @@
 FROM alpine
 
 ARG S3CMD_VERSION=2.1.0
+ARG DUMBINIT_VERSION=1.2.5
 
 RUN apk add --update --no-cache \
         ca-certificates \
@@ -13,7 +14,7 @@ RUN apk add --update --no-cache \
         python3 \
         sudo
 
-RUN curl -L https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.2.5_x86_64 > /usr/local/bin/dumb-init && \
+RUN curl -L https://github.com/Yelp/dumb-init/releases/download/v$DUMBINIT_VERSION/dumb-init_$DUMBINIT_VERSION_x86_64 > /usr/local/bin/dumb-init && \
   chmod +x /usr/local/bin/dumb-init
 
 RUN curl -L https://github.com/s3tools/s3cmd/releases/download/v$S3CMD_VERSION/s3cmd-$S3CMD_VERSION.tar.gz | tar xzf - -C /tmp && \

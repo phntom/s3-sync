@@ -5,3 +5,7 @@ if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
 else
   s3cmd -c /.s3cfg sync --delete-removed "$S3_DIRECTORY" "$S3_URL"
 fi
+
+if [ -n "$SLEEP_AFTER_PUSH" ] ; then
+  sleep "$SLEEP_AFTER_PUSH"
+fi
