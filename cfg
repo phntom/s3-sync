@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -n "$S3_ENDPOINT_HOSTNAME" ] ; then
-    echo "S3_ENDPOINT_HOSTNAME specified using $S3_ENDPOINT_HOSTNAME (specify the hostname only)"
+    echo "S3_ENDPOINT_HOSTNAME=$S3_ENDPOINT_HOSTNAME (specify only a hostname)"
     sed -i"" "s/s3.amazonaws.com/${S3_ENDPOINT_HOSTNAME}/g" /.s3cfg
 fi
 

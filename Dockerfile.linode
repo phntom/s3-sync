@@ -1,0 +1,5 @@
+# docker build --pull -t phntom/s3-sync:linode -f Dockerfile.linode . && docker push docker.io/phntom/s3-sync:linode
+
+FROM phntom/s3-sync:latest
+
+RUN sed -i"" "s/s3.amazonaws.com/eu-central-1.linodeobjects.com/g" /.s3cfg

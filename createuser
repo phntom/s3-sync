@@ -3,4 +3,4 @@
 echo creating user "$USERID" and group "$GROUPID"
 addgroup -g "$GROUPID" group
 adduser -DH -u "$USERID" -G group user
-chmod 444 /.s3cfg
+chown user:group /.s3cfg

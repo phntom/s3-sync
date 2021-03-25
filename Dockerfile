@@ -1,3 +1,5 @@
+# docker build --pull -t phntom/s3-sync --squash . && docker push docker.io/phntom/s3-sync
+
 FROM alpine
 
 ARG S3CMD_VERSION=2.1.0
@@ -20,9 +22,9 @@ RUN curl -L https://github.com/s3tools/s3cmd/releases/download/v$S3CMD_VERSION/s
 
 COPY --from=joelnb/dumb-init-alpine /usr/bin/dumb-init /usr/bin/dumb-init
 
-COPY createuser startup watch push cfg /usr/local/bin/
-
 COPY .s3cfg /
+
+COPY createuser startup watch push cfg /usr/local/bin/
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 

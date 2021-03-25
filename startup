@@ -4,7 +4,9 @@ cfg || exit 4
 
 if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
   createuser
-  sudo -u user -g group -- s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY"
+  sudo -u user -g group \
+    --preserve-env=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_ROLE_ARN,AWS_WEB_IDENTITY_TOKEN_FILE,S3_DIRECTORY,S3_URL \
+    -- s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY"
 else
   s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY"
 fi
