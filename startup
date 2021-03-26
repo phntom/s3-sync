@@ -2,11 +2,28 @@
 
 cfg || exit 4
 
+s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY" || exit 1
+# a failure here needs tp crash the init because push will delete files from s3
+# if allowed to processed
+
+if [ -f "$S3_DIRECTORY/.s3-empty-folders" ] ; then
+  cd "$S3_DIRECTORY" || exit 5
+  # shellcheck disable=SC2013
+  for path in $(grep -oE '^[a-zA-Z0-9_-][a-zA-Z0-9_/-]*$' .s3-empty-folders); do
+    mkdir -vp "$path"
+  done
+  cd /
+fi
+
 if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
   createuser
-  sudo -u user -g group \
-    --preserve-env=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_ROLE_ARN,AWS_WEB_IDENTITY_TOKEN_FILE,S3_DIRECTORY,S3_URL \
-    -- s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY"
-else
-  s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY"
+  chown -R "${USERID}:${GROUPID}" "$S3_DIRECTORY"
+elif [ -n "$USERID" ] ; then
+  export GROUPID=1111
+  createuser
+  chown -R "$USERID" "$S3_DIRECTORY"
+fi
+
+if [ -n "$SLEEP_AFTER_PULL" ] ; then
+  sleep "$SLEEP_AFTER_PULL" || true
 fi

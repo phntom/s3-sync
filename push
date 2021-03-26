@@ -1,6 +1,12 @@
 #!/bin/sh
 
+if [ -n "$EMPTY_S3_PATHS" ] ; then
+  find "$S3_DIRECTORY" -empty -type d > "$S3_DIRECTORY/.s3-empty-folders"
+fi
+
 if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
+  [ -f "$S3_DIRECTORY/.s3-empty-folders" ] \
+    && chown "$USERID:$GROUPID" "$S3_DIRECTORY/.s3-empty-folders"
   sudo -u user -g group \
     --preserve-env=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_ROLE_ARN,AWS_WEB_IDENTITY_TOKEN_FILE,S3_DIRECTORY,S3_URL \
     -- s3cmd -c /.s3cfg sync --delete-removed "$S3_DIRECTORY" "$S3_URL"
