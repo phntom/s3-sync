@@ -1,29 +1,32 @@
 #!/bin/sh
+set -e
 
-cfg || exit 4
+cfg
 
-s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY" || exit 1
-# a failure here needs tp crash the init because push will delete files from s3
-# if allowed to processed
+# A failure here needs to crash the init because push will delete files from s3
+# if allowed to proceed. `set -e` handles this.
+s3cmd -c /.s3cfg sync "$S3_URL" "$S3_DIRECTORY"
 
-if [ -f "$S3_DIRECTORY/.s3-empty-folders" ] ; then
-  cd "$S3_DIRECTORY" || exit 5
-  # shellcheck disable=SC2013
-  for path in $(grep -oE '^[a-zA-Z0-9_-][a-zA-Z0-9_/-]*$' .s3-empty-folders); do
+if [ -f "$S3_DIRECTORY/.s3-empty-folders" ]; then
+  cd "$S3_DIRECTORY"
+  # The file contains a list of paths, one per line.
+  # The grep is to sanitize the input.
+  grep -oE '^[a-zA-Z0-9_-][a-zA-Z0-9_/-]*$' .s3-empty-folders | while IFS= read -r path; do
     mkdir -vp "$path"
   done
   cd /
 fi
 
-if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
+if [ -n "$USERID" ]; then
+  # If GROUPID is not set, default to 1111.
+  # This behavior should be documented.
+  if [ -z "$GROUPID" ]; then
+    export GROUPID=1111
+  fi
   createuser
   chown -R "${USERID}:${GROUPID}" "$S3_DIRECTORY"
-elif [ -n "$USERID" ] ; then
-  export GROUPID=1111
-  createuser
-  chown -R "$USERID" "$S3_DIRECTORY"
 fi
 
-if [ -n "$SLEEP_AFTER_PULL" ] ; then
+if [ -n "$SLEEP_AFTER_PULL" ]; then
   sleep "$SLEEP_AFTER_PULL" || true
 fi

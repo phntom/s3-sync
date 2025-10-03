@@ -1,14 +1,23 @@
 #!/bin/sh
+set -e
 
 trap "exit 0" INT TERM EXIT
 
-cfg || exit 4
+cfg
 
-if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
+if [ -n "$USERID" ] && [ -n "$GROUPID" ]; then
   createuser
 fi
 
+if [ -z "$S3_DIRECTORY" ]; then
+  echo "ERROR: S3_DIRECTORY is not set." >&2
+  exit 1
+fi
+
+# Ensure the directory exists before watching it
+mkdir -p "$S3_DIRECTORY"
+
 inotifywait -mr "$S3_DIRECTORY" -e close_write |
-    while read path action file; do
-      push
-    done
+  while read -r path action file; do
+    push
+  done
