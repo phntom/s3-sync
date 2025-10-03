@@ -1,12 +1,22 @@
 #!/bin/sh
+set -e
 
-if [ -n "$EMPTY_S3_PATHS" ] ; then
+# If EMPTY_S3_PATHS is set, find empty directories and save them to a file.
+# This is used to recreate empty directories on restore.
+if [ -n "$EMPTY_S3_PATHS" ]; then
   find "$S3_DIRECTORY" -empty -type d > "$S3_DIRECTORY/.s3-empty-folders"
 fi
 
-if [ -n "$USERID" ] && [ -n "$GROUPID" ] ; then
-  [ -f "$S3_DIRECTORY/.s3-empty-folders" ] \
-    && chown "$USERID:$GROUPID" "$S3_DIRECTORY/.s3-empty-folders"
+# Sync files to S3.
+# If USERID and GROUPID are set, run s3cmd as that user.
+# Otherwise, run it as the current user (root).
+if [ -n "$USERID" ] && [ -n "$GROUPID" ]; then
+  if [ -f "$S3_DIRECTORY/.s3-empty-folders" ]; then
+    chown "$USERID:$GROUPID" "$S3_DIRECTORY/.s3-empty-folders"
+  fi
+
+  # We need to preserve these environment variables for s3cmd to work correctly.
+  # The user 'user' and group 'group' are created by the createuser script.
   sudo -u user -g group \
     --preserve-env=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_ROLE_ARN,AWS_WEB_IDENTITY_TOKEN_FILE,S3_DIRECTORY,S3_URL \
     -- s3cmd -c /.s3cfg sync --delete-removed "$S3_DIRECTORY" "$S3_URL"
@@ -14,6 +24,7 @@ else
   s3cmd -c /.s3cfg sync --delete-removed "$S3_DIRECTORY" "$S3_URL"
 fi
 
-if [ -n "$SLEEP_AFTER_PUSH" ] ; then
+# Sleep if configured to do so. This can be used to rate-limit pushes.
+if [ -n "$SLEEP_AFTER_PUSH" ]; then
   sleep "$SLEEP_AFTER_PUSH"
 fi

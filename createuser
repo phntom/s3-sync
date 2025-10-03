@@ -1,6 +1,16 @@
 #!/bin/sh
+set -e
 
-echo creating user "$USERID" and group "$GROUPID"
-addgroup -g "$GROUPID" group
-adduser -DH -u "$USERID" -G group user
+echo "creating user $USERID and group $GROUPID"
+
+# Check if group already exists
+if ! getent group "$GROUPID" >/dev/null 2>&1; then
+  addgroup -g "$GROUPID" group
+fi
+
+# Check if user already exists
+if ! getent passwd "$USERID" >/dev/null 2>&1; then
+  adduser -DH -u "$USERID" -G group user
+fi
+
 chown user:group /.s3cfg

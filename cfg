@@ -1,20 +1,26 @@
 #!/bin/sh
+set -e
 
-if [ -n "$S3_ENDPOINT_HOSTNAME" ] ; then
-    echo "S3_ENDPOINT_HOSTNAME=$S3_ENDPOINT_HOSTNAME (specify only a hostname)"
-    sed -i"" "s/s3.amazonaws.com/${S3_ENDPOINT_HOSTNAME}/g" /.s3cfg
+if [ -z "$S3_URL" ]; then
+  echo "ERROR: S3_URL is not set." >&2
+  exit 1
 fi
 
-s3cmd -c /.s3cfg ls "$S3_URL" > /dev/null
+if [ -n "$S3_ENDPOINT_HOSTNAME" ]; then
+    echo "S3_ENDPOINT_HOSTNAME=$S3_ENDPOINT_HOSTNAME (specify only a hostname)"
+    # The -i"" is for BSD sed (like in Alpine), for GNU sed it would be -i.
+    # Using a different separator for sed to avoid issues with slashes in the hostname.
+    sed -i"" "s|host_base = s3.amazonaws.com|host_base = ${S3_ENDPOINT_HOSTNAME}|" /.s3cfg
+    sed -i"" "s|host_bucket = %(bucket)s.s3.amazonaws.com|host_bucket = %(bucket)s.${S3_ENDPOINT_HOSTNAME}|" /.s3cfg
+fi
 
-exit_status=$?
-if [ $exit_status -ne 0 ]; then
-    echo "ERROR: failed to list target directory"
-    [ -n "$AWS_ACCESS_KEY_ID" ] || echo "AWS_ACCESS_KEY_ID not specified"
-    [ -n "$AWS_SECRET_ACCESS_KEY" ] || echo "AWS_SECRET_ACCESS_KEY not specified"
-    [ -n "$AWS_ROLE_ARN" ] || echo "AWS_ROLE_ARN not specified"
-    [ -n "$AWS_WEB_IDENTITY_TOKEN_FILE" ] || echo "AWS_WEB_IDENTITY_TOKEN_FILE not specified"
-
-    sleep 10
-    exit $exit_status
+# Test the connection to S3 by listing the target directory.
+# The output is redirected to /dev/null because we only care about the exit code.
+if ! s3cmd -c /.s3cfg ls "$S3_URL" > /dev/null; then
+    echo "ERROR: failed to list target directory" >&2
+    [ -n "$AWS_ACCESS_KEY_ID" ] || echo "AWS_ACCESS_KEY_ID not specified" >&2
+    [ -n "$AWS_SECRET_ACCESS_KEY" ] || echo "AWS_SECRET_ACCESS_KEY not specified" >&2
+    [ -n "$AWS_ROLE_ARN" ] || echo "AWS_ROLE_ARN not specified" >&2
+    [ -n "$AWS_WEB_IDENTITY_TOKEN_FILE" ] || echo "AWS_WEB_IDENTITY_TOKEN_FILE not specified" >&2
+    exit 1
 fi

@@ -1,38 +1,37 @@
-# s3-sync kubernetes sidecar
+# s3-sync Kubernetes Sidecar
 
-Quickly backup and restore your container's data volume by uploading it to S3.
+A Kubernetes sidecar container that continuously backs up a container's data volume to an S3-compatible object storage service. It can also restore the data on startup.
 
-Cheap out on persistent volumes for stuff like alertsmanager or even prometheus.
+This is useful for stateful applications where you might not want to use a persistent volume, for example, for Prometheus or Alertmanager.
 
-### Configuration TL;DR
+This image uses `s3cmd` version 2.4.0.
 
+### Configuration
 
-Environment variable name | Description | Example
---- | --- | ---
-`S3_URL` | An s3 path to store the data | `s3://bucket/prefix/`
-`S3_DIRECTORY` | Local path mounted with data | `/postgresql/`
-`S3_ENDPOINT_HOSTNAME` | Hostname of an alternative s3 endpoint | `eu-central-1.linodeobjects.com`
-`SLEEP_AFTER_PUSH` | Number of seconds to sleep after a full upload session | `"300"`
-`USERID` | User ID files should be written with, must come with `GROUPID` and cannot be zero for both | `"1001"`
-`GROUPID` | Group ID files should be written with, must come with `USERID` and cannot be zero for both | `"1001"`
-`AWS_ACCESS_KEY_ID` | Standard AWS access key | `xxxxxxxxxx`
-`AWS_SECRET_ACCESS_KEY` | Standard AWS key secret | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+The container is configured using environment variables.
 
+| Environment Variable      | Description                                                                                                                              | Example                          |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `S3_URL`                  | **Required.** The S3 path to store the data.                                                                                             | `s3://my-bucket/my-prefix/`      |
+| `S3_DIRECTORY`            | **Required.** The local path that is mounted as a volume.                                                                                | `/data/`                         |
+| `S3_ENDPOINT_HOSTNAME`    | The hostname of an S3-compatible endpoint (e.g., MinIO, Linode Objects, etc.).                                                           | `eu-central-1.linodeobjects.com` |
+| `SLEEP_AFTER_PUSH`        | The number of seconds to sleep after a successful upload. Can be used to rate-limit pushes.                                              | `300`                            |
+| `USERID`                  | The user ID that the files should be owned by. If set, `s3cmd` will be run as this user.                                                  | `1001`                           |
+| `GROUPID`                 | The group ID that the files should be owned by. If `USERID` is set and `GROUPID` is not, it defaults to `1111`.                            | `1001`                           |
+| `EMPTY_S3_PATHS`          | If set to any value, the container will track and restore empty directories.                                                             | `true`                           |
+| `AWS_ACCESS_KEY_ID`       | Your AWS access key ID.                                                                                                                  | `xxxxxxxxxx`                     |
+| `AWS_SECRET_ACCESS_KEY`   | Your AWS secret access key.                                                                                                              | `xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `AWS_ROLE_ARN`            | The ARN of an IAM role to assume.                                                                                                        | `arn:aws:iam::123456789012:role/MyRole` |
+| `AWS_WEB_IDENTITY_TOKEN_FILE` | The path to a file containing a web identity token. Used for IAM Roles for Service Accounts (IRSA).                                       | `/var/run/secrets/eks.amazonaws.com/serviceaccount/token` |
 
-### What do I need to do
+**Note:** Any standard AWS credential-related environment variables will also work (e.g., `AWS_SESSION_TOKEN`).
 
-Pass an S3 path to S3_URL and provide credentials like an AWS_ACCESS_KEY_ID 
-AWS_SECRET_ACCESS_KEY pair, but any other AWS compliant credentials will
-also work fine. Custom endpoints (minio/backblaze/linode/digitalocean/etc)
-can be passed through S3_ENDPOINT_HOSTNAME
+### How to Use
 
-Figure out the name of the volume your pod uses for data, try:
-`kubectl describe pod name` section
+1.  **Provide S3 Credentials:** Pass an `S3_URL` and provide credentials. This can be an `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` pair, or you can use IAM roles for service accounts. For S3-compatible services (MinIO, Backblaze, Linode, etc.), set the `S3_ENDPOINT_HOSTNAME`.
 
-Add a sidecar (sometimes called container) to your pod to back up your data.
+2.  **Add an `initContainer`:** Add an `initContainer` to your Pod definition to restore the data from S3 on startup. This container will run the `startup` script.
 
-Add an initContainer to your pod to restore the data on startup.
+3.  **Add a Sidecar:** Add a sidecar container to your Pod to continuously back up the data. This container will run the `watch` script.
 
-Examples for alertmanager, prometheus, postgresql, homeassistant will be
-provided below. This should cover most of the prominent helm styles.
-
+You'll need to mount the same volume to your main application container, the `initContainer`, and the sidecar container.
